@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.igrium.markbooks.command.BookTestCommand;
+import com.igrium.markbooks.command.MarkBooksCommand;
 
 public class MarkBooks implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -16,6 +16,7 @@ public class MarkBooks implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CommandRegistrationCallback.EVENT.register(BookTestCommand::register);
+        // CommandRegistrationCallback.EVENT.register(BookTestCommand::register);
+        CommandRegistrationCallback.EVENT.register(MarkBooksCommand::register);
     }
 }
