@@ -28,9 +28,10 @@ public class BookTestCommand {
     }
 
     public static int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        LogUtils.getLogger().info("Executing Command!");
         try {
             ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-            stack = new BookProcessor().writeBook(stack, StringArgumentType.getString(context, "contents"));
+            stack = new BookProcessor().writeBook(stack, StringArgumentType.getString(context, "contents"), context.getSource().getName());
             context.getSource().getPlayerOrThrow().getInventory().insertStack(stack);
 
             context.getSource().sendFeedback(() -> Text.literal("Created book."), false);

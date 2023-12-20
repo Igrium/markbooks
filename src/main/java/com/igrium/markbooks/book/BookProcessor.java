@@ -14,7 +14,7 @@ public class BookProcessor {
 
     private final Parser parser = Parser.builder().build();
 
-    public ItemStack writeBook(ItemStack stack, Text contents) {
+    public ItemStack writeBook(ItemStack stack, Text contents, String author) {
         if (!stack.isOf(Items.WRITTEN_BOOK)) {
             return stack;
         }
@@ -24,16 +24,18 @@ public class BookProcessor {
 
         NbtCompound compound = new NbtCompound();
         compound.put("pages", list);
+        compound.putString("author", author);
+        compound.putString("title", "Test Book 2");
         stack.setNbt(compound);
         return stack;
     }
 
-    public ItemStack writeBook(ItemStack stack, String markdown) {
+    public ItemStack writeBook(ItemStack stack, String markdown, String author) {
         BookTextGenerator generator = new BookTextGenerator();
         Node document = parser.parse(markdown);
 
         document.accept(generator);
         
-        return writeBook(stack, generator.getText());
+        return writeBook(stack, generator.getText(), author);
     }
 }
