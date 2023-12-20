@@ -35,7 +35,7 @@ public class BookTextGenerator extends AbstractVisitor {
     }
 
     private final MutableText text;
-    private StyleStack stack;
+    private StyleStack stack = new StyleStack();
     private Stack<ListEntry> lists = new Stack<>();
 
     private boolean allowLinks;
@@ -132,7 +132,7 @@ public class BookTextGenerator extends AbstractVisitor {
     public void visit(Heading heading) {
         stack.push(style -> style.withBold(true)
                 .withColor(headingColorSupplier.apply(heading.getLevel())));
-                
+
         visitChildren(heading);
         stack.pop();
     }
