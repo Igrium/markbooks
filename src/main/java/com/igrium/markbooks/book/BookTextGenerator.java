@@ -31,7 +31,7 @@ public class BookTextGenerator extends AbstractVisitor {
 
         public final boolean ordered;
 
-        public int index;
+        public int index = 1;
     }
 
     private final MutableText text;
@@ -104,17 +104,16 @@ public class BookTextGenerator extends AbstractVisitor {
             if (entry.ordered) {
                 text.append(String.valueOf(entry.index) + ". ");
             } else {
-                text.append("- ");
+                text.append("• ");
             }
             visitChildren(listItem);
-            text.append("\n");
             entry.index++;
         }
     }
 
     @Override
     public void visit(OrderedList orderedList) {
-        text.append("\n");
+        // text.append("\n");
         lists.push(new ListEntry(true));
         visitChildren(orderedList);
         lists.pop();
@@ -122,7 +121,7 @@ public class BookTextGenerator extends AbstractVisitor {
 
     @Override
     public void visit(BulletList bulletList) {
-        text.append("\n");
+        // text.append("\n");
         lists.push(new ListEntry(false));
         visitChildren(bulletList);
         lists.pop();
@@ -135,6 +134,8 @@ public class BookTextGenerator extends AbstractVisitor {
 
         visitChildren(heading);
         stack.pop();
+        text.append("\n\n");
+
     }
 
     public MutableText getText() {
@@ -145,11 +146,13 @@ public class BookTextGenerator extends AbstractVisitor {
         return allowLinks;
     }
 
-    public void setAllowLinks(boolean allowLinks) {
+    public BookTextGenerator setAllowLinks(boolean allowLinks) {
         this.allowLinks = allowLinks;
+        return this;
     }
 
-    public void setHeadingColorSupplier(IntFunction<TextColor> headingColorSupplier) {
+    public BookTextGenerator setHeadingColorSupplier(IntFunction<TextColor> headingColorSupplier) {
         this.headingColorSupplier = headingColorSupplier;
+        return this;
     }
 }

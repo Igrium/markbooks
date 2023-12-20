@@ -26,7 +26,7 @@ public class BookGenerator {
     }
 
     public ItemStack writeBook(ItemStack stack, String markdown, String title, String author) {
-        BookTextGenerator generator = new BookTextGenerator();
+        BookTextGenerator generator = new BookTextGenerator().setAllowLinks(true);;
         Node document = parser.parse(markdown);
         document.accept(generator);
 
