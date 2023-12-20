@@ -12,7 +12,7 @@ public class FutureUtils {
         public T get() throws E;
     }
 
-    public CompletableFuture<Void> runAsync(DangerousRunnable<?> runnable, Executor executor) {
+    public static CompletableFuture<Void> runAsync(DangerousRunnable<?> runnable, Executor executor) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         executor.execute(() -> {
             try {
@@ -25,7 +25,7 @@ public class FutureUtils {
         return future;
     }
 
-    public <T> CompletableFuture<T> supplyAsync(DangerousSupplier<T, ?> supplier, Executor executor) {
+    public static <T> CompletableFuture<T> supplyAsync(DangerousSupplier<T, ?> supplier, Executor executor) {
         CompletableFuture<T> future = new CompletableFuture<>();
         executor.execute(() -> {
             try {
