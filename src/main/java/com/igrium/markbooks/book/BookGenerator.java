@@ -20,7 +20,7 @@ public class BookGenerator {
     
     public CompletableFuture<ItemStack> writeBookAsync(BookLoader loader, String title, String author) {
         // We shouldn't be messing with an existing book off-thread.
-        return BookLoader.loadAsync(loader).thenApply(
+        return loader.load().thenApply(
             md -> writeBook(new ItemStack(Items.WRITTEN_BOOK), md, title, author)
         );
     }

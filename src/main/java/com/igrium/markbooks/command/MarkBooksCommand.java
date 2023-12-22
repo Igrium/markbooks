@@ -1,6 +1,8 @@
 package com.igrium.markbooks.command;
 
+import com.igrium.markbooks.MarkBooks;
 import com.igrium.markbooks.book.BookGenerator;
+import com.igrium.markbooks.filebin.FilebinHandle;
 import com.igrium.markbooks.loader.BookLoader;
 import com.igrium.markbooks.loader.UrlBookLoader;
 import com.mojang.brigadier.CommandDispatcher;
@@ -32,6 +34,10 @@ public class MarkBooksCommand {
             argument("title", StringArgumentType.string()).then(
                 literal("url").then(
                     argument("url", StringArgumentType.string()).executes(MarkBooksCommand::createWithUrl))
+                ).then(
+                    literal("filebin").then(
+                        argument("binId", StringArgumentType.string()).executes(MarkBooksCommand::createWithFilebin)
+                    )
                 )
             )
         );
@@ -48,6 +54,11 @@ public class MarkBooksCommand {
         }
 
         return create(context, new UrlBookLoader(url));
+    }
+
+    private static int createWithFilebin(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        String binId = StringArgumentType.getString(context, "binId");
+        return create(context, new FilebinHandle(binId, MarkBooks.FILEBIN));
     }
 
     private static int create(CommandContext<ServerCommandSource> context, BookLoader loader) throws CommandSyntaxException {

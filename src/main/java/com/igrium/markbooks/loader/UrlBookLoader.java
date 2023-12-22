@@ -1,9 +1,13 @@
 package com.igrium.markbooks.loader;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
+
+import com.igrium.markbooks.util.FutureUtils;
+
+import net.minecraft.util.Util;
 
 public class UrlBookLoader implements BookLoader {
 
@@ -19,12 +23,22 @@ public class UrlBookLoader implements BookLoader {
         return url;
     }
 
+    // @Override
+    // public String load() throws IOException {
+    //     try(InputStream in = new BufferedInputStream(url.openStream())) {
+    //         byte[] bytes = in.readAllBytes();
+    //         return new String(bytes);
+    //     }
+    // }
+
     @Override
-    public String load() throws IOException {
-        try(InputStream in = new BufferedInputStream(url.openStream())) {
-            byte[] bytes = in.readAllBytes();
-            return new String(bytes);
-        }
+    public CompletableFuture<String> load() {
+        return FutureUtils.supplyAsync(() -> {
+            try (InputStream in = new BufferedInputStream(url.openStream())) {
+                byte[] bytes = in.readAllBytes();
+                return new String(bytes);
+            }
+        }, Util.getIoWorkerExecutor());
     }
     
 }
