@@ -59,6 +59,10 @@ public class FilebinAPI {
     public URI getUrl(String bin, String filename) {
         return getUrl().resolve(bin + "/" + filename);
     }
+
+    public URI getBin(String bin) {
+        return getUrl().resolve(bin);
+    }
     
     /**
      * Load the metadata of a bin on filebin.

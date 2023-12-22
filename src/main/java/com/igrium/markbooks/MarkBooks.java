@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.igrium.markbooks.command.MarkBooksCommand;
+import com.igrium.markbooks.command.MarkBookCommand;
 import com.igrium.markbooks.filebin.FilebinAPI;
 
 public class MarkBooks implements ModInitializer {
@@ -17,14 +17,25 @@ public class MarkBooks implements ModInitializer {
     // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("markbooks");
 
-    public static FilebinAPI FILEBIN;
+    private static MarkBooks instance;
+
+    public static MarkBooks getInstance() {
+        return instance;
+    }
+
+    private FilebinAPI filebinAPI;
+
+    public FilebinAPI getFilebinAPI() {
+        return filebinAPI;
+    }
+    
 
     @Override
     public void onInitialize() {
-        // CommandRegistrationCallback.EVENT.register(BookTestCommand::register);
-        CommandRegistrationCallback.EVENT.register(MarkBooksCommand::register);
+        instance = this;
+        CommandRegistrationCallback.EVENT.register(MarkBookCommand::register);
         try {
-            FILEBIN = new FilebinAPI("https://filebin.net");
+            filebinAPI = new FilebinAPI("https://filebin.net");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

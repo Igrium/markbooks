@@ -3,6 +3,7 @@ package com.igrium.markbooks.filebin;
 import java.util.concurrent.CompletableFuture;
 
 import com.igrium.markbooks.filebin.FilebinBinMeta.FilebinFileMeta;
+import com.igrium.markbooks.filebin.FilebinException.NoFilesException;
 import com.igrium.markbooks.loader.BookLoader;
 
 public class FilebinHandle implements BookLoader {
@@ -17,6 +18,9 @@ public class FilebinHandle implements BookLoader {
     @Override
     public CompletableFuture<String> load() {
         return api.getBinMeta(binId).thenApply(meta -> {
+            if (meta.files == null || meta.files.isEmpty()) {
+                throw new NoFilesException();
+            }
             // Search for files with .md extension first.
             for (FilebinFileMeta f : meta.files) {
                 if (f.filename.endsWith(".md") && f.contentType.contains("text")) {
