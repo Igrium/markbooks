@@ -1,7 +1,9 @@
 package com.igrium.markbooks.command;
 
 import com.igrium.markbooks.MarkBooks;
+import com.igrium.markbooks.MarkBooksConfig;
 import com.igrium.markbooks.book.BookGenerator;
+import com.igrium.markbooks.book.BookTextGenerator;
 import com.igrium.markbooks.filebin.FilebinException;
 import com.igrium.markbooks.filebin.FilebinHandle;
 import com.igrium.markbooks.loader.BookLoader;
@@ -76,7 +78,9 @@ public class MarkBookCommand {
     }
 
     private static int create(CommandContext<ServerCommandSource> context, BookLoader loader) throws CommandSyntaxException {
-        BookGenerator generator = new BookGenerator();
+        BookGenerator generator = new BookGenerator(
+                () -> BookTextGenerator.create(MarkBooksConfig.get(), context.getSource().hasPermissionLevel(2)));
+
         String title = StringArgumentType.getString(context, "title");
         ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         String author = player.getName().getString();
@@ -101,7 +105,7 @@ public class MarkBookCommand {
                 ItemStack prevStack = player.getInventory().getStack(slotId);
                 
                 if (!prevStack.isOf(Items.WRITABLE_BOOK)) {
-                    context.getSource().sendError(Text.literal("Please hold a book and quill."));
+                    context.getSource().sendError(Text.literal("Please hold a book and quill and try again."));
                     return null;
                 }
 

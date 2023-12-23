@@ -2,6 +2,7 @@ package com.igrium.markbooks.book;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -17,6 +18,15 @@ import net.minecraft.text.Text;
 public class BookGenerator {
 
     private final Parser parser = Parser.builder().build();
+    private final Supplier<BookTextGenerator> textGenerator;
+
+    public BookGenerator(Supplier<BookTextGenerator> textGenerator) {
+        this.textGenerator = textGenerator;
+    }
+
+    public BookGenerator() {
+        this.textGenerator = BookTextGenerator::new;
+    }
     
     public CompletableFuture<ItemStack> writeBookAsync(BookLoader loader, String title, String author) {
         // We shouldn't be messing with an existing book off-thread.
@@ -26,7 +36,7 @@ public class BookGenerator {
     }
 
     public ItemStack writeBook(ItemStack stack, String markdown, String title, String author) {
-        BookTextGenerator generator = new BookTextGenerator().setAllowLinks(true);;
+        BookTextGenerator generator = textGenerator.get();
         Node document = parser.parse(markdown);
         document.accept(generator);
 

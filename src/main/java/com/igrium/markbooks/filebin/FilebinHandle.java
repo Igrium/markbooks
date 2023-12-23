@@ -33,6 +33,6 @@ public class FilebinHandle implements BookLoader {
                 }
             }
             throw new FilebinException("No eligable files were found.");
-        }).thenCompose(meta -> api.getFileContents(binId, meta.filename));
+        }).thenCompose(meta -> api.downloadFile(binId, meta));
     }
 }

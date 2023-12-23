@@ -10,7 +10,11 @@ import java.util.concurrent.CompletableFuture;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.igrium.markbooks.filebin.FilebinBinMeta.FilebinFileMeta;
+import com.igrium.markbooks.filebin.FilebinException.IllegalLengthException;
 import com.igrium.markbooks.filebin.HttpException.HttpNotFoundException;
+
+import net.minecraft.util.Util;
 
 public class FilebinAPI {
     private final URI url;
@@ -22,7 +26,10 @@ public class FilebinAPI {
 
     public FilebinAPI(URI url) {
         this.url = url;
-        httpClient = HttpClient.newBuilder().followRedirects(Redirect.ALWAYS).build();
+        httpClient = HttpClient.newBuilder()
+                .followRedirects(Redirect.ALWAYS)
+                .executor(Util.getIoWorkerExecutor())
+                .build();
     }
 
     public FilebinAPI(String url) throws URISyntaxException {
@@ -104,5 +111,12 @@ public class FilebinAPI {
             }
             return res.body();
         });
+    }
+
+    public CompletableFuture<String> downloadFile(String bin, FilebinFileMeta file) {
+        if (file.bytes > maxFileLength) {
+            throw new IllegalLengthException();
+        }
+        return getFileContents(bin, file.filename);
     }
 }

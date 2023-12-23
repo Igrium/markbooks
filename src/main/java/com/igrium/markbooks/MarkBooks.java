@@ -2,8 +2,13 @@ package com.igrium.markbooks;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +34,41 @@ public class MarkBooks implements ModInitializer {
         return filebinAPI;
     }
     
+    private MarkBooksConfig config;
+
+    public MarkBooksConfig getConfig() {
+        return config;
+    }
+
 
     @Override
     public void onInitialize() {
         instance = this;
+        initConfig();
+
+        filebinAPI = new FilebinAPI(config.getFilebinUrl());
         CommandRegistrationCallback.EVENT.register(MarkBookCommand::register);
-        try {
-            filebinAPI = new FilebinAPI("https://filebin.net");
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+    }
+
+    private void initConfig() {
+        Path configFile = FabricLoader.getInstance().getConfigDir().resolve("markbooks.json");
+
+        if (Files.isRegularFile(configFile)) {
+            try (BufferedReader reader = Files.newBufferedReader(configFile)) {
+                config = MarkBooksConfig.fromJson(reader);
+            } catch (IOException e) {
+                LOGGER.error("Error loading MarkBooks config.", e);
+            }
+        }
+
+        if (config == null) {
+            config = new MarkBooksConfig();
+            try (BufferedWriter writer = Files.newBufferedWriter(configFile)) {
+                writer.write(MarkBooksConfig.toJson(config));
+
+            } catch (IOException e) {
+                LOGGER.error("Error saving MarkBooks config.", e);
+            }
         }
     }
 }
