@@ -1,11 +1,15 @@
 package com.igrium.markbooks.book;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.function.IntFunction;
 
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.BulletList;
+import org.commonmark.node.Code;
 import org.commonmark.node.Emphasis;
 import org.commonmark.node.HardLineBreak;
 import org.commonmark.node.Heading;
@@ -15,6 +19,7 @@ import org.commonmark.node.OrderedList;
 import org.commonmark.node.Paragraph;
 import org.commonmark.node.SoftLineBreak;
 import org.commonmark.node.StrongEmphasis;
+import org.commonmark.node.ThematicBreak;
 
 import com.igrium.markbooks.MarkBooksConfig;
 import com.igrium.markbooks.util.StyleStack;
@@ -24,6 +29,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 public class BookTextGenerator extends AbstractVisitor {
@@ -69,11 +75,17 @@ public class BookTextGenerator extends AbstractVisitor {
         public int index = 1;
     }
 
-    private final MutableText text;
+    private final LinkedList<MutableText> pages = new LinkedList<>();
+
     private StyleStack stack = new StyleStack();
     private Stack<ListEntry> lists = new Stack<>();
 
     private boolean allowLinks;
+
+    
+    public BookTextGenerator() {
+        pages.add(Text.empty());
+    }
 
     public final boolean allowLinks() {
         return allowLinks;
@@ -121,13 +133,13 @@ public class BookTextGenerator extends AbstractVisitor {
         this.linkColor = linkColor;
     }
 
-    public BookTextGenerator() {
-        this.text = Text.empty();
-    }
-
     @Override
     public void visit(org.commonmark.node.Text node) {
-        text.append(Text.literal(node.getLiteral()).setStyle(stack.peek()));
+        pages.getLast().append(Text.literal(node.getLiteral()).setStyle(stack.peek()));
+    }
+
+    public void visit(Code code) {
+        pages.getLast().append(Text.literal(code.getLiteral()).formatted(Formatting.DARK_GRAY));
     }
 
     @Override
@@ -161,18 +173,18 @@ public class BookTextGenerator extends AbstractVisitor {
 
     @Override
     public void visit(SoftLineBreak softLineBreak) {
-        text.append("\n");
+        pages.getLast().append("\n");
     }
 
     @Override
     public void visit(HardLineBreak hardLineBreak) {
-        text.append("\n");
+        pages.getLast().append("\n");
     }
 
     @Override
     public void visit(Paragraph paragraph) {
         visitChildren(paragraph);
-        text.append("\n\n");
+        pages.getLast().append("\n\n");
     }
     
     @Override
@@ -182,9 +194,9 @@ public class BookTextGenerator extends AbstractVisitor {
         } else {
             ListEntry entry = lists.peek();
             if (entry.ordered) {
-                text.append(olPrefix.formatted(entry.index));
+                pages.getLast().append(olPrefix.formatted(entry.index));
             } else {
-                text.append(ulPrefix);
+                pages.getLast().append(ulPrefix);
             }
             visitChildren(listItem);
             entry.index++;
@@ -214,11 +226,16 @@ public class BookTextGenerator extends AbstractVisitor {
 
         visitChildren(heading);
         stack.pop();
-        text.append("\n\n");
+        pages.getLast().append("\n\n");
 
     }
 
-    public MutableText getText() {
-        return text;
+    @Override
+    public void visit(ThematicBreak thematicBreak) {
+        pages.add(Text.empty());
+    }
+
+    public List<MutableText> getPages() {
+        return new ArrayList<>(pages);
     }
 }

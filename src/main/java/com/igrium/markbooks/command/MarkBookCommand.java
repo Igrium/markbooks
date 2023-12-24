@@ -40,7 +40,7 @@ public class MarkBookCommand {
             RegistrationEnvironment environment) {
         
         dispatcher.register(literal("markbook").then(
-            literal("url").then(
+            literal("url").requires(MarkBookCommand::allowUrls).then(
                 argument("url", StringArgumentType.string()).then(
                     argument("title", StringArgumentType.string()).executes(MarkBookCommand::createWithUrl)
                 )
@@ -156,6 +156,14 @@ public class MarkBookCommand {
     }
 
     private static boolean requireWritableBook() {
-        return true;
+        return MarkBooksConfig.get().requireWritableBook();
+    }
+    
+    private static boolean allowUrls(ServerCommandSource source) {
+        if (MarkBooksConfig.get().restrictUrlDownload()) {
+            return source.hasPermissionLevel(2);
+        } else {
+            return true;
+        }
     }
 }

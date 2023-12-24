@@ -40,10 +40,10 @@ public class BookGenerator {
         Node document = parser.parse(markdown);
         document.accept(generator);
 
-        return writeBookNbt(stack, List.of(generator.getText()), title, author);
+        return writeBookNbt(stack, generator.getPages(), title, author);
     }
 
-    public ItemStack writeBookNbt(ItemStack stack, List<Text> pages, String title, String author) {
+    public ItemStack writeBookNbt(ItemStack stack, List<? extends Text> pages, String title, String author) {
         if (!stack.isOf(Items.WRITTEN_BOOK)) return stack;
 
         stack.setSubNbt("author", NbtString.of(author));

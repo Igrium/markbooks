@@ -6,7 +6,6 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -56,19 +55,21 @@ public class MarkBooks implements ModInitializer {
         if (Files.isRegularFile(configFile)) {
             try (BufferedReader reader = Files.newBufferedReader(configFile)) {
                 config = MarkBooksConfig.fromJson(reader);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error("Error loading MarkBooks config.", e);
             }
         }
 
         if (config == null) {
             config = new MarkBooksConfig();
-            try (BufferedWriter writer = Files.newBufferedWriter(configFile)) {
-                writer.write(MarkBooksConfig.toJson(config));
+        }
 
-            } catch (IOException e) {
-                LOGGER.error("Error saving MarkBooks config.", e);
-            }
+        // Re-save config to reinit any missing keys
+        try (BufferedWriter writer = Files.newBufferedWriter(configFile)) {
+            writer.write(MarkBooksConfig.toJson(config));
+
+        } catch (Exception e) {
+            LOGGER.error("Error saving MarkBooks config.", e);
         }
     }
 }
