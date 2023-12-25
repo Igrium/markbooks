@@ -1,6 +1,7 @@
 package com.igrium.markbooks.book;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import org.commonmark.node.StrongEmphasis;
 import org.commonmark.node.ThematicBreak;
 
 import com.igrium.markbooks.MarkBooksConfig;
+import com.igrium.markbooks.util.StringUtils;
 import com.igrium.markbooks.util.StyleStack;
 
 import net.minecraft.text.ClickEvent;
@@ -34,6 +36,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 public class BookTextGenerator extends AbstractVisitor {
+
+    private static final int LINE_WIDTH = 20;
+    private static final int PAGE_HEIGHT = 14;
 
     /**
      * Create a book text generator from a given config.
@@ -82,7 +87,6 @@ public class BookTextGenerator extends AbstractVisitor {
     private Stack<ListEntry> lists = new Stack<>();
 
     private boolean allowLinks;
-
     
     public BookTextGenerator() {
         pages.add(Text.empty());
@@ -134,9 +138,31 @@ public class BookTextGenerator extends AbstractVisitor {
         this.linkColor = linkColor;
     }
 
+    private int currentLine = 0;
+
     public void appendLiteral(String literal, Style style) {
-        pages.getLast().append(Text.literal(literal).setStyle(styles.peek()));
+        if (literal.isEmpty()) return;
+        int[] pageBreaks = StringUtils.identifyPageBreaks(literal, LINE_WIDTH, PAGE_HEIGHT, currentLine, true);
+
+        String[] splitPages = StringUtils.splitString(literal, pageBreaks);
+        if (splitPages.length == 0) return;
+
+        for (int i = 0; i < splitPages.length; i++) {
+            String pageContents = splitPages[i];
+            pages.getLast().append(Text.literal(pageContents).setStyle(style));
+
+            // There's another page to add.
+            if (i + 1 < splitPages.length) {
+                pages.add(Text.empty());
+            }
+        }
+
+        // We went onto a new page, so the current line is reset.
+        if (splitPages.length > 1) {
+            currentLine = 0;
+        }
         
+        currentLine += StringUtils.identifyLineBreaks(splitPages[splitPages.length - 1], LINE_WIDTH, allowLinks).length;
     }
 
     @Override
