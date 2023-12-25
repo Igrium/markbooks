@@ -36,6 +36,7 @@ public class BookGenerator {
     }
 
     public ItemStack writeBook(ItemStack stack, String markdown, String title, String author) {
+        markdown = markdown.replaceAll("\\R", "\n"); // Normalize line endings.
         BookTextGenerator generator = textGenerator.get();
         Node document = parser.parse(markdown);
         document.accept(generator);

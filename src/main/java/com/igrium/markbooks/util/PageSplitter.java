@@ -1,6 +1,9 @@
 package com.igrium.markbooks.util;
 
 import java.util.LinkedList;
+import java.util.List;
+
+import it.unimi.dsi.fastutil.ints.IntList;
 
 public final class PageSplitter {
 
@@ -18,7 +21,7 @@ public final class PageSplitter {
             // Always add a new line at the beginning of a segment.
             lines.add(new StringBuilder(maxWidth));
             String[] words = segment.split(" ");
-
+            
             for (String word : words) {
                 int available = maxWidth - lines.getLast().length();
 
@@ -46,6 +49,45 @@ public final class PageSplitter {
         }
 
         return lines.stream().map(b -> b.toString().stripTrailing()).toArray(String[]::new);
+    }
+
+    public static String[] splitLines(String string, int maxWidth, int startOffset) {
+        if (string.isEmpty()) return new String[0];
+
+        string = "F".repeat(startOffset) + string;
+        String[] lines = splitLines(string, maxWidth);
+        lines[0] = lines[0].substring(startOffset);
+        return lines;
+    }
+
+    public static int[] identifyLineBreaks(String string, int maxWidth) {
+        String[] segments = string.split("\\R");
+        int currentLineIndex = 0;
+
+        List<Integer> lineBreaks = new LinkedList<>();
+
+        char[] array = string.toCharArray();
+        int i = 0;
+        char c;
+        while (i < array.length) {
+            c = array[i];
+
+            if (c == '\n' || c == '\r') {
+                lineBreaks.add(i);
+                i++;
+
+                // Skip a line line if this is '\r\n'
+                if (i < array.length && array[i] == '\n') {
+                    i++;
+                }
+                continue;
+            }
+
+
+        }
+
+
+        return lineBreaks.stream().mapToInt(v -> v).toArray();
     }
 
     /**

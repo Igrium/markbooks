@@ -47,7 +47,7 @@ public final class MarkBooksConfig {
             this.olPrefix = olPrefix;
         }
 
-        private TextColor[] headingColors = new TextColor[] { TextColor.parse("green") };
+        private TextColor[] headingColors = new TextColor[] { TextColor.parse("dark_red") };
 
         public TextColor[] getHeadingColors() {
             return headingColors;

@@ -27,6 +27,7 @@ import com.igrium.markbooks.util.StyleStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
@@ -77,7 +78,7 @@ public class BookTextGenerator extends AbstractVisitor {
 
     private final LinkedList<MutableText> pages = new LinkedList<>();
 
-    private StyleStack stack = new StyleStack();
+    private StyleStack styles = new StyleStack();
     private Stack<ListEntry> lists = new Stack<>();
 
     private boolean allowLinks;
@@ -133,42 +134,49 @@ public class BookTextGenerator extends AbstractVisitor {
         this.linkColor = linkColor;
     }
 
+    public void appendLiteral(String literal, Style style) {
+        pages.getLast().append(Text.literal(literal).setStyle(styles.peek()));
+        
+    }
+
     @Override
     public void visit(org.commonmark.node.Text node) {
-        pages.getLast().append(Text.literal(node.getLiteral()).setStyle(stack.peek()));
+        // pages.getLast().append(Text.literal(node.getLiteral()).setStyle(styles.peek()));
+        appendLiteral(node.getLiteral(), styles.peek());
     }
 
     public void visit(Code code) {
-        pages.getLast().append(Text.literal(code.getLiteral()).formatted(Formatting.DARK_GRAY));
+        appendLiteral(code.getLiteral(), Style.EMPTY.withColor(Formatting.DARK_GRAY));
+        // pages.getLast().append(Text.literal(code.getLiteral()).formatted(Formatting.DARK_GRAY));
     }
 
     @Override
     public void visit(Emphasis emphasis) {
-        stack.push(style -> style.withItalic(true));
+        styles.push(style -> style.withItalic(true));
         visitChildren(emphasis);
-        stack.pop();
+        styles.pop();
     }
 
     @Override
     public void visit(StrongEmphasis strongEmphasis) {
-        stack.push(style -> style.withBold(true));
+        styles.push(style -> style.withBold(true));
         visitChildren(strongEmphasis);
-        stack.pop();
+        styles.pop();
     }
 
     @Override
     public void visit(Link link) {
         if (allowLinks()) {
-            stack.push(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link.getDestination()))
+            styles.push(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link.getDestination()))
                     .withColor(linkColor)
                     .withUnderline(true)
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(link.getDestination()))));
         } else {
-            stack.push(style -> style);
+            styles.push(style -> style);
         }
 
         visitChildren(link);
-        stack.pop();
+        styles.pop();
     }
 
     @Override
@@ -221,11 +229,11 @@ public class BookTextGenerator extends AbstractVisitor {
 
     @Override
     public void visit(Heading heading) {
-        stack.push(style -> style.withBold(true)
+        styles.push(style -> style.withBold(true)
                 .withColor(headingColorSupplier.apply(heading.getLevel())));
 
         visitChildren(heading);
-        stack.pop();
+        styles.pop();
         pages.getLast().append("\n\n");
 
     }
